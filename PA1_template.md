@@ -1,14 +1,10 @@
----
-title: 'Reproducible Research:  Peer Assessment 1'
-date: "15 March 2015"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research:  Peer Assessment 1
+15 March 2015  
 
 ## *Loading and preprocessing the data*
 
-```{r}
+
+```r
 ## Environment initilization
 library(data.table, warn.conflicts = FALSE, quietly = TRUE)
 library(dplyr, warn.conflicts = FALSE, quietly = TRUE)
@@ -25,7 +21,8 @@ dtActivity <- as.data.table(read.table(chrInput, header = TRUE, sep = ",",
 
 ## *What is mean total number of steps taken per day?*
 
-```{r}
+
+```r
 ## Summarize data for daily total steps and calculate the mean and median of the set.
 dtActTab <- summarize(group_by(dtActivity, date), numDailySteps = sum(steps, na.rm = TRUE))
 numActTab1 <- dtActTab[, c(mean(numDailySteps), median(numDailySteps))]
@@ -38,14 +35,17 @@ hist(dtActTab$numDailySteps,
      main = "Frequency of Total Daily Steps", xlab = "Total Daily Steps")
 ```
 
-The mean number of total steps taken per day is **`r round(numActTab1[1])`**.
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
 
-The median number of total steps taken per day is **`r as.integer(numActTab1[2])`**.
+The mean number of total steps taken per day is **9354**.
+
+The median number of total steps taken per day is **10395**.
 
 
 ## *What is the average daily activity pattern?*
 
-```{r}
+
+```r
 ## Summarize data for interval average steps across all days.  Find interval with maximum average.
 dtActTab <- summarize(group_by(dtActivity, interval), numIntervalAvgSteps = mean(steps, na.rm = TRUE))
 dtActTab <- dtActTab[, boolMaxAve := {temp <- max(dtActTab$numIntervalAvgSteps);
@@ -58,17 +58,19 @@ with(dtActTab, {
           main = "Average Daily Activity Pattern",
           xlab = "5-minute interval", ylab = "Average # of steps")
 })
-
 ```
 
-The 5-minute interval with the maximum average number of steps during the period is interval **`r numActTab2$interval`**.
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+
+The 5-minute interval with the maximum average number of steps during the period is interval **835**.
 
 ## *Imputing missing values*
 
 
-The total number of missing values in the dataset is **`r nrow(dtActivity[is.na(dtActivity$steps), ])`**.
+The total number of missing values in the dataset is **2304**.
 
-```{r}
+
+```r
 ## Imputing strategy is to use the interval median of all days measured.
 dtActTab <- summarize(group_by(dtActivity, interval),
                       numIntervalAvgSteps = median(steps, na.rm = TRUE))
@@ -91,13 +93,16 @@ hist(dtActTab$numDailySteps,
      main="Frequency of Total Daily Steps", xlab="Total Daily Steps")
 ```
 
-The new mean number of total steps taken per day is **`r round(numActTab3[1])`**.  Compared to the original computed mean, imputing the dataset resulted in a net % change in the mean number of total steps taken per day to be **`r round(100 * (numActTab3[1] - numActTab1[1]) / numActTab1[1], digits = 2)`%**
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
 
-The new median number of total steps taken per day is **`r as.integer(numActTab3[2])`**.  Compared to the original computed median, imputing the dataset resulted in a net % change in the median number of total steps taken per day to be **`r round(100 * (numActTab3[2] - numActTab1[2]) / numActTab1[2], digits = 2)`%**
+The new mean number of total steps taken per day is **9504**.  Compared to the original computed mean, imputing the dataset resulted in a net % change in the mean number of total steps taken per day to be **1.6%**
+
+The new median number of total steps taken per day is **10395**.  Compared to the original computed median, imputing the dataset resulted in a net % change in the median number of total steps taken per day to be **0%**
 
 ## *Are there differences in activity patterns between weekdays and weekends?*
 
-```{r}
+
+```r
 ## Mutate imputed dataset to add weekday / weekend factor
 dtActImpute <- mutate(dtActImpute,
                       facWeekSeg = factor(1*(weekdays(date) %in% c("Saturday", "Sunday")),
@@ -117,5 +122,6 @@ with(dtActTab[dtActTab$facWeekSeg=="weekday", ],
      plot(interval, numIntervalAvgSteps, type = "l", 
           main = "Weekday",
           xlab = "5-minute interval", ylab = "Average # of steps"))
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
